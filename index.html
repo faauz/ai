@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> AI - Career Success Platform</title>
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Framer Motion (CDN) -->
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <style>
+    .service-card:hover {
+      transform: scale(1.05);
+      transition: transform 0.3s ease;
+    }
+    .service-card:active {
+      transform: scale(0.95);
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Hero Section -->
+  <div class="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
+    <div class="container mx-auto text-center fade-in">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6">Land Your Dream Job with AI</h1>
+      <p class="text-xl mb-8 max-w-2xl mx-auto">
+        AI helps you craft the perfect resume, ace interviews, and grow your career.
+      </p>
+      <button class="px-8 py-3 bg-white text-blue-600 rounded-full font-bold hover:bg-gray-100">
+        PRIMUM -$10
+      </button>
+    </div>
+  </div>
+
+  <!-- Service Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-8" id="services">
+    <!-- Card 1: Resume Builder -->
+    <div class="bg-blue-100 rounded-xl p-6 shadow-lg cursor-pointer service-card" 
+         onclick="showTool('resume')">
+      <div class="text-4xl mb-4">📄</div>
+      <h3 class="text-xl font-bold mb-2">AI Resume Builder</h3>
+      <p class="text-gray-600">ATS-optimized resumes in 2 minutes</p>
+    </div>
+    
+    <!-- Card 2: Interview Coach -->
+    <div class="bg-purple-100 rounded-xl p-6 shadow-lg cursor-pointer service-card"
+         onclick="showTool('interview')">
+      <div class="text-4xl mb-4">🎤</div>
+      <h3 class="text-xl font-bold mb-2">Interview Coach</h3>
+      <p class="text-gray-600">Practice with AI-powered simulations</p>
+    </div>
+    
+    <!-- Card 3: Email Generator -->
+    <div class="bg-green-100 rounded-xl p-6 shadow-lg cursor-pointer service-card"
+         onclick="showTool('email')">
+      <div class="text-4xl mb-4">✉️</div>
+      <h3 class="text-xl font-bold mb-2">Cover Email Generator</h3>
+      <p class="text-gray-600">Persuasive emails tailored to jobs</p>
+    </div>
+    
+    <!-- Card 4: Career Path -->
+    <div class="bg-orange-100 rounded-xl p-6 shadow-lg cursor-pointer service-card"
+         onclick="showTool('career')">
+      <div class="text-4xl mb-4">🧭</div>
+      <h3 class="text-xl font-bold mb-2">Career Pathfinder</h3>
+      <p class="text-gray-600">Discover your ideal career trajectory</p>
+    </div>
+  </div>
+
+  <!-- Tools Section (Hidden by Default) -->
+  <div id="tools" class="hidden">
+    <!-- Resume Tool -->
+    <div id="resume-tool" class="min-h-screen p-8">
+      <button onclick="hideTool()" class="mb-6 flex items-center gap-2 text-blue-500">
+        ← Back to all tools
+      </button>
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">AI Resume Optimizer</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <label class="block mb-2 font-medium">Paste Job Description</label>
+            <textarea
+              id="jobDesc"
+              class="w-full h-64 p-4 border rounded-lg"
+              placeholder="Copy-paste the job posting here..."
+            ></textarea>
+          </div>
+          <div>
+            <label class="block mb-2 font-medium">Your Resume</label>
+            <textarea
+              id="resumeText"
+              class="w-full h-64 p-4 border rounded-lg"
+              placeholder="Paste your current resume..."
+            ></textarea>
+          </div>
+        </div>
+        <button
+          onclick="optimizeResume()"
+          class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Optimize My Resume
+        </button>
+        <div id="resumeResult" class="mt-8 p-6 bg-gray-50 rounded-lg hidden">
+          <h2 class="text-xl font-bold mb-4">Optimized Resume:</h2>
+          <div id="optimizedResume" class="whitespace-pre-wrap"></div>
+          <p id="matchScore" class="mt-4 text-green-600"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview Tool (Placeholder) -->
+    <div id="interview-tool" class="min-h-screen p-8">
+      <button onclick="hideTool()" class="mb-6 flex items-center gap-2 text-blue-500">
+        ← Back to all tools
+      </button>
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-3xl font-bold mb-6">AI Interview Simulator</h1>
+        <p class="text-xl mb-8">Coming soon! Practice with realistic AI interviews.</p>
+      </div>
+    </div>
+
+    <!-- Email Tool (Placeholder) -->
+    <div id="email-tool" class="min-h-screen p-8">
+      <button onclick="hideTool()" class="mb-6 flex items-center gap-2 text-blue-500">
+        ← Back to all tools
+      </button>
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-3xl font-bold mb-6">AI Email Generator</h1>
+        <p class="text-xl mb-8">Coming soon! Get perfectly tailored cover emails.</p>
+      </div>
+    </div>
+
+    <!-- Career Tool (Placeholder) -->
+    <div id="career-tool" class="min-h-screen p-8">
+      <button onclick="hideTool()" class="mb-6 flex items-center gap-2 text-blue-500">
+        ← Back to all tools
+      </button>
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-3xl font-bold mb-6">AI Career Pathfinder</h1>
+        <p class="text-xl mb-8">Coming soon! Discover your ideal career trajectory.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tool Navigation
+    function showTool(tool) {
+      document.getElementById('services').classList.add('hidden');
+      document.getElementById('tools').classList.remove('hidden');
+      document.querySelectorAll('#tools > div').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`${tool}-tool`).classList.remove('hidden');
+    }
+
+    function hideTool() {
+      document.getElementById('services').classList.remove('hidden');
+      document.getElementById('tools').classList.add('hidden');
+    }
+
+    // Mock Resume Optimization
+    function optimizeResume() {
+      const jobDesc = document.getElementById('jobDesc').value;
+      const resumeText = document.getElementById('resumeText').value;
+      
+      if (!jobDesc || !resumeText) {
+        alert("Please fill in both fields!");
+        return;
+      }
+
+      // Mock AI result (replace with real API call)
+      const mockResult = {
+        optimizedResume: `${resumeText}\n\n=== AI OPTIMIZATION ===\n- Added keywords: "${jobDesc.split(' ').slice(0, 3).join(', ')}..."\n- Improved action verbs`,
+        matchScore: Math.floor(Math.random() * 30) + 70
+      };
+
+      document.getElementById('optimizedResume').textContent = mockResult.optimizedResume;
+      document.getElementById('matchScore').textContent = `ATS Match Score: ${mockResult.matchScore}%`;
+      document.getElementById('resumeResult').classList.remove('hidden');
+      
+      // Scroll to result
+      document.getElementById('resumeResult').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
