@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> AI - Career Success Platform</title>
-  <!-- Tailwind CSS (CDN) -->
+  <title>FAUZ AI - Career Success Platform</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Framer Motion (CDN) -->
-  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
   <style>
     .service-card:hover {
       transform: scale(1.05);
@@ -23,6 +21,15 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    #recordButton.recording {
+      background-color: #ef4444;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -31,10 +38,10 @@
     <div class="container mx-auto text-center fade-in">
       <h1 class="text-4xl md:text-6xl font-bold mb-6">Land Your Dream Job with AI</h1>
       <p class="text-xl mb-8 max-w-2xl mx-auto">
-        AI helps you craft the perfect resume, ace interviews, and grow your career.
+        FAUZ helps you craft the perfect resume, ace interviews, and grow your career.
       </p>
       <button class="px-8 py-3 bg-white text-blue-600 rounded-full font-bold hover:bg-gray-100">
-        PRIMUM -$10
+        PRIMUM - $10/month
       </button>
     </div>
   </div>
@@ -74,7 +81,7 @@
     </div>
   </div>
 
-  <!-- Tools Section (Hidden by Default) -->
+  <!-- Tools Section -->
   <div id="tools" class="hidden">
     <!-- Resume Tool -->
     <div id="resume-tool" class="min-h-screen p-8">
@@ -102,27 +109,72 @@
           </div>
         </div>
         <button
-          onclick="optimizeResume()"
-          class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          onclick="optimizeResumeWithAI()"
+          class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+          id="resumeButton"
         >
-          Optimize My Resume
+          <span id="resumeButtonText">Optimize My Resume</span>
+          <span id="resumeSpinner" class="hidden animate-spin">↻</span>
         </button>
         <div id="resumeResult" class="mt-8 p-6 bg-gray-50 rounded-lg hidden">
           <h2 class="text-xl font-bold mb-4">Optimized Resume:</h2>
-          <div id="optimizedResume" class="whitespace-pre-wrap"></div>
-          <p id="matchScore" class="mt-4 text-green-600"></p>
+          <div id="optimizedResume" class="whitespace-pre-wrap bg-white p-4 rounded"></div>
+          <p id="matchScore" class="mt-4 text-green-600 font-medium"></p>
         </div>
       </div>
     </div>
 
-    <!-- Interview Tool (Placeholder) -->
+    <!-- Interview Tool -->
     <div id="interview-tool" class="min-h-screen p-8">
       <button onclick="hideTool()" class="mb-6 flex items-center gap-2 text-blue-500">
         ← Back to all tools
       </button>
-      <div class="max-w-4xl mx-auto text-center">
+      <div class="max-w-4xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">AI Interview Simulator</h1>
-        <p class="text-xl mb-8">Coming soon! Practice with realistic AI interviews.</p>
+        
+        <div class="mb-8">
+          <label class="block mb-2 font-medium">Select Industry:</label>
+          <select id="industrySelect" class="w-full p-3 border rounded-lg">
+            <option value="tech">Technology</option>
+            <option value="finance">Finance</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="marketing">Marketing</option>
+          </select>
+        </div>
+        
+        <div class="bg-purple-50 p-6 rounded-lg mb-8">
+          <h3 class="text-xl font-bold mb-4">Question:</h3>
+          <div id="interviewQuestion" class="text-lg mb-6">Click "Start Interview" to begin</div>
+          
+          <div class="flex flex-col items-center gap-4">
+            <button 
+              id="recordButton"
+              onclick="toggleRecording()"
+              class="px-6 py-3 bg-purple-600 text-white rounded-full font-bold hover:bg-purple-700 flex items-center gap-2"
+            >
+              <span id="recordIcon">🎤</span>
+              <span id="recordText">Record Answer</span>
+            </button>
+            
+            <button 
+              onclick="generateFeedback()"
+              id="feedbackButton"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 hidden flex items-center justify-center gap-2"
+            >
+              <span>Get AI Feedback</span>
+              <span id="feedbackSpinner" class="hidden animate-spin">↻</span>
+            </button>
+          </div>
+        </div>
+        
+        <div id="interviewFeedback" class="hidden p-6 bg-gray-50 rounded-lg">
+          <h3 class="text-xl font-bold mb-4">AI Feedback:</h3>
+          <div id="feedbackContent" class="whitespace-pre-wrap"></div>
+          <div class="mt-4">
+            <span class="font-medium">Score: </span>
+            <span id="feedbackScore" class="text-green-600"></span>/100
+          </div>
+        </div>
       </div>
     </div>
 
@@ -150,12 +202,18 @@
   </div>
 
   <script>
-    // Tool Navigation
+    // ======================
+    // Core Functions
+    // ======================
     function showTool(tool) {
       document.getElementById('services').classList.add('hidden');
       document.getElementById('tools').classList.remove('hidden');
       document.querySelectorAll('#tools > div').forEach(el => el.classList.add('hidden'));
       document.getElementById(`${tool}-tool`).classList.remove('hidden');
+      
+      if (tool === 'interview') {
+        resetInterview();
+      }
     }
 
     function hideTool() {
@@ -163,8 +221,10 @@
       document.getElementById('tools').classList.add('hidden');
     }
 
-    // Mock Resume Optimization
-    function optimizeResume() {
+    // ======================
+    // Resume AI Integration
+    // ======================
+    async function optimizeResumeWithAI() {
       const jobDesc = document.getElementById('jobDesc').value;
       const resumeText = document.getElementById('resumeText').value;
       
@@ -173,19 +233,205 @@
         return;
       }
 
-      // Mock AI result (replace with real API call)
-      const mockResult = {
-        optimizedResume: `${resumeText}\n\n=== AI OPTIMIZATION ===\n- Added keywords: "${jobDesc.split(' ').slice(0, 3).join(', ')}..."\n- Improved action verbs`,
-        matchScore: Math.floor(Math.random() * 30) + 70
-      };
+      // UI Loading state
+      const button = document.getElementById('resumeButton');
+      const spinner = document.getElementById('resumeSpinner');
+      const buttonText = document.getElementById('resumeButtonText');
+      button.disabled = true;
+      spinner.classList.remove('hidden');
+      buttonText.textContent = "Optimizing...";
 
-      document.getElementById('optimizedResume').textContent = mockResult.optimizedResume;
-      document.getElementById('matchScore').textContent = `ATS Match Score: ${mockResult.matchScore}%`;
-      document.getElementById('resumeResult').classList.remove('hidden');
-      
-      // Scroll to result
-      document.getElementById('resumeResult').scrollIntoView({ behavior: 'smooth' });
+      try {
+        // In a real implementation, you would call your backend API here
+        // which then calls OpenAI with your API key
+        const optimizedResume = await mockOpenAICall(
+          `Optimize this resume for the following job description:\n\n` +
+          `Job Description:\n${jobDesc}\n\n` +
+          `Original Resume:\n${resumeText}\n\n` +
+          `Return ONLY the optimized resume with no additional commentary. ` +
+          `Focus on ATS keywords and measurable achievements.`
+        );
+
+        // Display results
+        document.getElementById('optimizedResume').textContent = optimizedResume;
+        document.getElementById('matchScore').textContent = `ATS Match Score: ${Math.floor(Math.random() * 30) + 70}%`;
+        document.getElementById('resumeResult').classList.remove('hidden');
+        document.getElementById('resumeResult').scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert("Error optimizing resume: " + error.message);
+      } finally {
+        button.disabled = false;
+        spinner.classList.add('hidden');
+        buttonText.textContent = "Optimize My Resume";
+      }
     }
+
+    // ======================
+    // Interview AI Integration
+    // ======================
+    let mediaRecorder;
+    let audioChunks = [];
+    let currentQuestion = "";
+    let userAnswer = "";
+
+    function resetInterview() {
+      document.getElementById('interviewQuestion').textContent = "Click 'Start Interview' to begin";
+      document.getElementById('feedbackButton').classList.add('hidden');
+      document.getElementById('interviewFeedback').classList.add('hidden');
+      document.getElementById('recordText').textContent = "Record Answer";
+      document.getElementById('recordIcon').textContent = "🎤";
+      document.getElementById('recordButton').classList.remove('recording');
+      currentQuestion = "";
+      userAnswer = "";
+    }
+
+    async function startInterview() {
+      const industry = document.getElementById('industrySelect').value;
+      
+      // Get question from AI
+      const question = await mockOpenAICall(
+        `Generate one interview question for a ${industry} position. ` +
+        `Make it behavioral (e.g., "Tell me about a time...") ` +
+        `and relevant to mid-career professionals. Return ONLY the question.`
+      );
+      
+      currentQuestion = question;
+      document.getElementById('interviewQuestion').textContent = question;
+      document.getElementById('feedbackButton').classList.add('hidden');
+      document.getElementById('interviewFeedback').classList.add('hidden');
+    }
+
+    async function toggleRecording() {
+      const recordButton = document.getElementById('recordButton');
+      
+      if (!recordButton.classList.contains('recording')) {
+        // Start recording
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+          
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            userAnswer = await transcribeAudio(audioBlob);
+            document.getElementById('feedbackButton').classList.remove('hidden');
+          };
+          
+          mediaRecorder.start();
+          recordButton.classList.add('recording');
+          document.getElementById('recordText').textContent = "Stop Recording";
+          document.getElementById('recordIcon').textContent = "⏹️";
+          
+          // Auto-stop after 2 minutes
+          setTimeout(() => {
+            if (mediaRecorder.state === "recording") {
+              mediaRecorder.stop();
+              recordButton.classList.remove('recording');
+              document.getElementById('recordText').textContent = "Record Answer";
+              document.getElementById('recordIcon').textContent = "🎤";
+            }
+          }, 120000);
+          
+        } catch (error) {
+          alert("Error accessing microphone: " + error.message);
+        }
+      } else {
+        // Stop recording
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        recordButton.classList.remove('recording');
+        document.getElementById('recordText').textContent = "Record Answer";
+        document.getElementById('recordIcon').textContent = "🎤";
+      }
+    }
+
+    async function generateFeedback() {
+      if (!userAnswer) {
+        alert("Please record your answer first!");
+        return;
+      }
+
+      const feedbackButton = document.getElementById('feedbackButton');
+      const spinner = document.getElementById('feedbackSpinner');
+      feedbackButton.disabled = true;
+      spinner.classList.remove('hidden');
+
+      try {
+        // In a real implementation, this would call your backend API
+        const feedback = await mockOpenAICall(
+          `Interview Question: ${currentQuestion}\n\n` +
+          `Candidate Answer: ${userAnswer}\n\n` +
+          `Provide detailed feedback on this interview answer with these sections:\n` +
+          `1. Strengths\n` +
+          `2. Areas for Improvement\n` +
+          `3. Suggested Better Answer\n` +
+          `4. Numerical Score (1-100)\n\n` +
+          `Format as Markdown.`
+        );
+
+        // Extract score (assuming it's the last number in the response)
+        const scoreMatch = feedback.match(/\b(\d{1,3})\/100\b/);
+        const score = scoreMatch ? scoreMatch[1] : "75";
+
+        document.getElementById('feedbackContent').innerHTML = marked.parse(feedback);
+        document.getElementById('feedbackScore').textContent = score;
+        document.getElementById('interviewFeedback').classList.remove('hidden');
+        document.getElementById('interviewFeedback').scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert("Error generating feedback: " + error.message);
+      } finally {
+        feedbackButton.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    }
+
+    // ======================
+    // Mock AI Functions (Replace with real API calls)
+    // ======================
+    async function mockOpenAICall(prompt) {
+      // In a real implementation, replace this with:
+      // const response = await fetch('your-backend-api', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ prompt })
+      // });
+      // return await response.json();
+      
+      // Mock responses for demo purposes
+      if (prompt.includes("Optimize this resume")) {
+        return `John Doe\nSenior Software Engineer\n\nPROFESSIONAL SUMMARY\n- 8+ years building scalable web applications\n- Expert in JavaScript, React, and Node.js\n- Led team of 5 developers to deliver 3 major product features\n\nEXPERIENCE\nSenior Developer at TechCorp (2020-Present)\n- Optimized application performance by 40% through code refactoring\n- Implemented CI/CD pipeline reducing deployment time by 65%\n\nEDUCATION\nBS Computer Science, State University`;
+      } else if (prompt.includes("interview question")) {
+        return "Tell me about a time you faced a difficult technical challenge and how you overcame it.";
+      } else if (prompt.includes("Candidate Answer")) {
+        return `### Feedback\n\n1. **Strengths**\n- Good example of problem-solving\n- Showed technical knowledge\n\n2. **Areas for Improvement**\n- Lacked specific metrics\n- Could better explain collaboration\n\n3. **Suggested Better Answer**\n"At my last role, we faced a database bottleneck causing 30% slower response times. I led a team to implement Redis caching, which improved performance by 45%. We collaborated with QA to ensure zero downtime during deployment."\n\n4. **Score**: 82/100`;
+      }
+      
+      return "Mock AI response for: " + prompt.substring(0, 50) + "...";
+    }
+
+    async function transcribeAudio(audioBlob) {
+      // In a real implementation, use Whisper API or similar
+      return "Mock transcription of user's interview answer. In a real implementation, this would be transcribed from audio using AI.";
+    }
+
+    // Initialize Markdown parser (for feedback display)
+    const marked = {
+      parse: (text) => {
+        return text
+          .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+          .replace(/^1\. (.*$)/gm, '<p><strong>1. $1</strong></p>')
+          .replace(/\n\n/g, '<br><br>');
+      }
+    };
+
+    // Start interview when interview tool opens
+    document.getElementById('interview-tool').addEventListener('click', () => {
+      setTimeout(startInterview, 500);
+    });
   </script>
 </body>
 </html>
